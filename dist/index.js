@@ -78,7 +78,11 @@ window.JST["game"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<p>Player1: ');
+      if (this.result) {
+        __out.push('\n  <button id="restart">Restart!</button>\n');
+      }
+    
+      __out.push('\n<p>Player1: ');
     
       if (this.turn === 1) {
         __out.push(__sanitize("○ "));
@@ -95,12 +99,6 @@ window.JST["game"] = function (__obj) {
       __out.push(__sanitize(this.message));
     
       __out.push('</p>\n');
-    
-      if (this.result) {
-        __out.push('\n  <button id="restart">Restart!</button>\n');
-      }
-    
-      __out.push('\n');
     
     }).call(this);
     
@@ -213,6 +211,57 @@ window.JST["space"] = function (__obj) {
   return __out.join('');
 };
 
+if (!window.JST) {
+  window.JST = {};
+}
+window.JST["start"] = function (__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      __out.push('<button>Start</button>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+};
+
 (function() {
   window.MyApp = {
     Views: {},
@@ -221,7 +270,7 @@ window.JST["space"] = function (__obj) {
     Channels: {},
     Objects: {},
     initialize: function() {
-      var board, game, game_info, i, j, k, l, spaces;
+      var board, i, j, k, l, spaces, start_view;
       spaces = new MyApp.Collections.Spaces;
       for (i = k = 0; k <= 2; i = ++k) {
         for (j = l = 0; l <= 2; j = ++l) {
@@ -236,14 +285,10 @@ window.JST["space"] = function (__obj) {
       });
       $('#main').html(board.render().el);
       MyApp.Channels.Game = Radio.channel('game');
-      game = new MyApp.Objects.Game({
+      start_view = new MyApp.Views.Start({
         collection: spaces
       });
-      game_info = new MyApp.Views.Game({
-        collection: spaces
-      });
-      $('#main').append(game_info.render().el);
-      return game.start();
+      return $('#main').append(start_view.render().el);
     }
   };
 
@@ -614,5 +659,48 @@ window.JST["space"] = function (__obj) {
     return Space;
 
   })(Backbone.Marionette.View);
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  MyApp.Views.Start = (function(superClass) {
+    extend(Start, superClass);
+
+    function Start() {
+      return Start.__super__.constructor.apply(this, arguments);
+    }
+
+    Start.prototype.template = JST['start'];
+
+    Start.prototype.events = {
+      'click': 'start'
+    };
+
+    Start.prototype.id = 'game_info';
+
+    Start.prototype.render = function() {
+      this.$el.html(this.template);
+      return this;
+    };
+
+    Start.prototype.start = function(event) {
+      var game, game_info;
+      game = new MyApp.Objects.Game({
+        collection: this.collection
+      });
+      game_info = new MyApp.Views.Game({
+        collection: this.collection
+      });
+      $('#main').append(game_info.render().el);
+      game.start();
+      return this.remove();
+    };
+
+    return Start;
+
+  })(Backbone.View);
 
 }).call(this);

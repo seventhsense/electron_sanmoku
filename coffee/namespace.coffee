@@ -15,14 +15,11 @@ window.MyApp =
       collection: spaces
     $('#main').html board.render().el 
     MyApp.Channels.Game = Radio.channel('game')
-    game = new MyApp.Objects.Game
-      collection: spaces
 
-    game_info = new MyApp.Views.Game
+    start_view = new MyApp.Views.Start
       collection: spaces
-    $('#main').append game_info.render().el
+    $('#main').append start_view.render().el
 
-    game.start()
 
 $ ->
   MyApp.initialize()
