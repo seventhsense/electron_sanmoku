@@ -299,6 +299,28 @@ window.JST["start"] = function (__obj) {
 }).call(this);
 
 (function() {
+  MyApp.Objects.Ai = (function() {
+    function Ai(cpu) {
+      this.cpu = cpu;
+    }
+
+    Ai.prototype.choose = function(spaces) {
+      var choosen;
+      choosen = spaces.sample();
+      if (choosen.get('value') !== 0) {
+        return this.choose(spaces);
+      } else {
+        return choosen;
+      }
+    };
+
+    return Ai;
+
+  })();
+
+}).call(this);
+
+(function() {
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -315,7 +337,8 @@ window.JST["start"] = function (__obj) {
       this.turn = 1;
       this.game_on = false;
       this.player = options.player * 1;
-      return this.cpu = -1 * this.player;
+      this.cpu = -1 * this.player;
+      return this.ai = new MyApp.Objects.Ai(this.cpu);
     };
 
     Game.prototype.start = function() {
@@ -340,20 +363,16 @@ window.JST["start"] = function (__obj) {
       };
       MyApp.Channels.Game.trigger('render:game_info', obj);
       this.game_on = false;
-      sample = this.spaces.sample();
-      if (sample.get('value') === 0) {
-        sample.set({
-          value: this.cpu
-        });
-        result = this.spaces.checkGameEnd(sample);
-        if (result) {
-          return this.gameEnd(result);
-        }
-        this.turn = -1 * this.turn;
-        return this.playerTurn();
-      } else {
-        return this.cpuTurn();
+      sample = this.ai.choose(this.spaces);
+      sample.set({
+        value: this.cpu
+      });
+      result = this.spaces.checkGameEnd(sample);
+      if (result) {
+        return this.gameEnd(result);
       }
+      this.turn = -1 * this.turn;
+      return this.playerTurn();
     };
 
     Game.prototype.playerTurn = function() {

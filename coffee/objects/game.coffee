@@ -6,6 +6,7 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
     @game_on = false # 動行可能
     @player = options.player * 1 # 整数化
     @cpu = -1 * @player
+    @ai = new MyApp.Objects.Ai @cpu
 
   start: ->
     obj =
@@ -23,15 +24,13 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
       message: 'cpu turn'
     MyApp.Channels.Game.trigger 'render:game_info', obj
     @game_on = false
-    sample = @spaces.sample() 
-    if sample.get('value') is 0
-      sample.set(value: @cpu) 
-      result = @spaces.checkGameEnd(sample)
-      return @gameEnd(result) if result
-      @turn = -1 * @turn
-      return @playerTurn()
-    else
-      return @cpuTurn()
+    sample = @ai.choose(@spaces)
+    sample.set(value: @cpu)
+
+    result = @spaces.checkGameEnd(sample)
+    return @gameEnd(result) if result
+    @turn = -1 * @turn
+    return @playerTurn()
 
   playerTurn: ->
     obj =
