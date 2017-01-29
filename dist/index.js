@@ -308,7 +308,7 @@ window.JST["start"] = function (__obj) {
       var choosen;
       choosen = this.checkReach(spaces);
       if (!choosen) {
-        'check player reach';
+        console.log('check player reach');
         choosen = this.checkPlayerReach(spaces);
       }
       if (!choosen) {
@@ -347,21 +347,18 @@ window.JST["start"] = function (__obj) {
         var x, xsum, y, ysum;
         x = space.get('x');
         y = space.get('y');
-        console.log(x, y);
-        console.log('xsum', xsum = spaces.getXSum(1, x));
+        xsum = spaces.getXSum(1, x);
         if (xsum === reach) {
           s = _.first(_.filter(spaces.getXAray(x), function(s) {
             return s.get('value') === 0;
           }));
-          console.log('xsum reach!', s);
           return true;
         }
-        console.log('ysum', ysum = spaces.getYSum(1, y));
+        ysum = spaces.getYSum(1, y);
         if (ysum === reach) {
           s = _.first(_.filter(spaces.getYAray(y), function(s) {
             return s.get('value') === 0;
           }));
-          console.log('ysum reach!', s);
           return true;
         }
       }));
@@ -395,21 +392,18 @@ window.JST["start"] = function (__obj) {
         var x, xsum, y, ysum;
         x = space.get('x');
         y = space.get('y');
-        console.log(x, y);
-        console.log('xsum', xsum = spaces.getXSum(1, x));
+        xsum = spaces.getXSum(1, x);
         if (xsum === reach) {
           s = _.first(_.filter(spaces.getXAray(x), function(s) {
             return s.get('value') === 0;
           }));
-          console.log('xsum reach!', s);
           return true;
         }
-        console.log('ysum', ysum = spaces.getYSum(1, y));
+        ysum = spaces.getYSum(1, y);
         if (ysum === reach) {
           s = _.first(_.filter(spaces.getYAray(y), function(s) {
             return s.get('value') === 0;
           }));
-          console.log('ysum reach!', s);
           return true;
         }
       }));

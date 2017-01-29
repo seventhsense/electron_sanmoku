@@ -7,7 +7,7 @@ main_window = null
 create_window = ->
   main_window = new bw
     width: 300
-    height: 400
+    height: 500
   main_window.loadURL("file://#{__dirname}/index.html")
   # main_window.webContents.openDevTools()
   main_window.on 'closed', ->

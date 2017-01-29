@@ -12,7 +12,7 @@
   create_window = function() {
     main_window = new bw({
       width: 300,
-      height: 400
+      height: 500
     });
     main_window.loadURL("file://" + __dirname + "/index.html");
     return main_window.on('closed', function() {

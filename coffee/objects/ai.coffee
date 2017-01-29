@@ -5,7 +5,7 @@ class MyApp.Objects.Ai
   choose: (spaces)->
     choosen = @checkReach(spaces)
     unless choosen
-      'check player reach'
+      console.log 'check player reach'
       choosen = @checkPlayerReach(spaces)
     unless choosen
       console.log 'random'
@@ -32,16 +32,13 @@ class MyApp.Objects.Ai
     choosen = _.first _.filter validChoice, (space)->
       x = space.get('x')
       y = space.get('y')
-      console.log x, y
-      console.log 'xsum', xsum = spaces.getXSum(1, x)
+      xsum = spaces.getXSum(1, x)
       if xsum is reach
         s = _.first _.filter spaces.getXAray(x), (s)-> return s.get('value') is 0
-        console.log 'xsum reach!', s
         return true
-      console.log 'ysum', ysum = spaces.getYSum(1, y)
+      ysum = spaces.getYSum(1, y)
       if ysum is reach
         s = _.first _.filter spaces.getYAray(y), (s)-> return s.get('value') is 0
-        console.log 'ysum reach!', s
         return true
     if choosen then return choosen else return false
 
@@ -62,16 +59,13 @@ class MyApp.Objects.Ai
     choosen = _.first _.filter validChoice, (space)->
       x = space.get('x')
       y = space.get('y')
-      console.log x, y
-      console.log 'xsum', xsum = spaces.getXSum(1, x)
+      xsum = spaces.getXSum(1, x)
       if xsum is reach
         s = _.first _.filter spaces.getXAray(x), (s)-> return s.get('value') is 0
-        console.log 'xsum reach!', s
         return true
-      console.log 'ysum', ysum = spaces.getYSum(1, y)
+      ysum = spaces.getYSum(1, y)
       if ysum is reach
         s = _.first _.filter spaces.getYAray(y), (s)-> return s.get('value') is 0
-        console.log 'ysum reach!', s
         return true
     if choosen then return choosen else return false
 
