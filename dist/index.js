@@ -306,11 +306,117 @@ window.JST["start"] = function (__obj) {
 
     Ai.prototype.choose = function(spaces) {
       var choosen;
-      choosen = spaces.sample();
-      if (choosen.get('value') !== 0) {
-        return this.choose(spaces);
-      } else {
+      choosen = this.checkReach(spaces);
+      if (!choosen) {
+        'check player reach';
+        choosen = this.checkPlayerReach(spaces);
+      }
+      if (!choosen) {
+        console.log('random');
+        choosen = _.sample(this.validChoice(spaces));
+      }
+      return choosen;
+    };
+
+    Ai.prototype.validChoice = function(spaces) {
+      return spaces.where({
+        value: 0
+      });
+    };
+
+    Ai.prototype.checkReach = function(spaces) {
+      choosen;
+      var asum, bsum, choosen, reach, s, validChoice;
+      validChoice = this.validChoice(spaces);
+      asum = spaces.getASum();
+      bsum = spaces.getBSum();
+      reach = 2 * this.cpu;
+      if (asum === reach) {
+        s = _.first(_.filter(spaces.getAAray(), function(s) {
+          return s.get('value') === 0;
+        }));
+        return choosen = s;
+      }
+      if (bsum === reach) {
+        s = _.first(_.filter(spaces.getBAray(), function(s) {
+          return s.get('value') === 0;
+        }));
+        return choosen = s;
+      }
+      choosen = _.first(_.filter(validChoice, function(space) {
+        var x, xsum, y, ysum;
+        x = space.get('x');
+        y = space.get('y');
+        console.log(x, y);
+        console.log('xsum', xsum = spaces.getXSum(1, x));
+        if (xsum === reach) {
+          s = _.first(_.filter(spaces.getXAray(x), function(s) {
+            return s.get('value') === 0;
+          }));
+          console.log('xsum reach!', s);
+          return true;
+        }
+        console.log('ysum', ysum = spaces.getYSum(1, y));
+        if (ysum === reach) {
+          s = _.first(_.filter(spaces.getYAray(y), function(s) {
+            return s.get('value') === 0;
+          }));
+          console.log('ysum reach!', s);
+          return true;
+        }
+      }));
+      if (choosen) {
         return choosen;
+      } else {
+        return false;
+      }
+    };
+
+    Ai.prototype.checkPlayerReach = function(spaces) {
+      choosen;
+      var asum, bsum, choosen, reach, s, validChoice;
+      validChoice = this.validChoice(spaces);
+      asum = spaces.getASum();
+      bsum = spaces.getBSum();
+      reach = 2 * this.cpu * -1;
+      if (asum === reach) {
+        s = _.first(_.filter(spaces.getAAray(), function(s) {
+          return s.get('value') === 0;
+        }));
+        return choosen = s;
+      }
+      if (bsum === reach) {
+        s = _.first(_.filter(spaces.getBAray(), function(s) {
+          return s.get('value') === 0;
+        }));
+        return choosen = s;
+      }
+      choosen = _.first(_.filter(validChoice, function(space) {
+        var x, xsum, y, ysum;
+        x = space.get('x');
+        y = space.get('y');
+        console.log(x, y);
+        console.log('xsum', xsum = spaces.getXSum(1, x));
+        if (xsum === reach) {
+          s = _.first(_.filter(spaces.getXAray(x), function(s) {
+            return s.get('value') === 0;
+          }));
+          console.log('xsum reach!', s);
+          return true;
+        }
+        console.log('ysum', ysum = spaces.getYSum(1, y));
+        if (ysum === reach) {
+          s = _.first(_.filter(spaces.getYAray(y), function(s) {
+            return s.get('value') === 0;
+          }));
+          console.log('ysum reach!', s);
+          return true;
+        }
+      }));
+      if (choosen) {
+        return choosen;
+      } else {
+        return false;
       }
     };
 
@@ -364,6 +470,7 @@ window.JST["start"] = function (__obj) {
       MyApp.Channels.Game.trigger('render:game_info', obj);
       this.game_on = false;
       sample = this.ai.choose(this.spaces);
+      console.log('sample', sample);
       sample.set({
         value: this.cpu
       });
@@ -472,32 +579,10 @@ window.JST["start"] = function (__obj) {
       x = model.get('x');
       y = model.get('y');
       turn = model.get('value');
-      sum_x = this.checkValues(turn, this.where({
-        x: x
-      }));
-      sum_y = this.checkValues(turn, this.where({
-        y: y
-      }));
-      sum_a = this.checkValues(turn, _.union(this.where({
-        x: 0,
-        y: 0
-      }), this.where({
-        x: 1,
-        y: 1
-      }), this.where({
-        x: 2,
-        y: 2
-      })));
-      sum_b = this.checkValues(turn, _.union(this.where({
-        x: 2,
-        y: 0
-      }), this.where({
-        x: 1,
-        y: 1
-      }), this.where({
-        x: 0,
-        y: 2
-      })));
+      sum_x = this.getXSum(turn, x);
+      sum_y = this.getYSum(turn, y);
+      sum_a = this.getASum(turn);
+      sum_b = this.getBSum(turn);
       checker = _.max([sum_x, sum_y, sum_a, sum_b]);
       if (checker === 3) {
         return turn;
@@ -511,9 +596,78 @@ window.JST["start"] = function (__obj) {
     };
 
     Spaces.prototype.checkValues = function(turn, array) {
+      if (turn == null) {
+        turn = 1;
+      }
       return turn * _.reduce(array, function(sum, i) {
         return sum + i.get('value');
       }, 0);
+    };
+
+    Spaces.prototype.getXSum = function(turn, x) {
+      if (turn == null) {
+        turn = 1;
+      }
+      return this.checkValues(turn, this.getXAray(x));
+    };
+
+    Spaces.prototype.getYSum = function(turn, y) {
+      if (turn == null) {
+        turn = 1;
+      }
+      return this.checkValues(turn, this.getYAray(y));
+    };
+
+    Spaces.prototype.getASum = function(turn) {
+      if (turn == null) {
+        turn = 1;
+      }
+      return this.checkValues(turn, this.getAAray());
+    };
+
+    Spaces.prototype.getBSum = function(turn) {
+      if (turn == null) {
+        turn = 1;
+      }
+      return this.checkValues(turn, this.getBAray());
+    };
+
+    Spaces.prototype.getXAray = function(x) {
+      return this.where({
+        x: x
+      });
+    };
+
+    Spaces.prototype.getYAray = function(y) {
+      return this.where({
+        y: y
+      });
+    };
+
+    Spaces.prototype.getAAray = function() {
+      return _.union(this.where({
+        x: 0,
+        y: 0
+      }), this.where({
+        x: 1,
+        y: 1
+      }), this.where({
+        x: 2,
+        y: 2
+      }));
+    };
+
+    Spaces.prototype.getBAray = function() {
+      return _.union(this.where({
+        x: 2,
+        y: 0
+      }), this.where({
+        x: 1,
+        y: 1
+      }), this.where({
+        x: 0,
+        y: 2
+      }));
     };
 
     return Spaces;

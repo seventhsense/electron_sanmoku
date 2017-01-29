@@ -28,6 +28,7 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
     @game_on = false
     # choice
     sample = @ai.choose(@spaces)
+    console.log 'sample',  sample
     sample.set(value: @cpu)
     # check game end
     result = @spaces.checkGameEnd(sample)
