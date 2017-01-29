@@ -1,0 +1,7 @@
+<p>Player1: <%= "○ " if @turn == 1 %></p>
+<p>Player2: <%= "○ " unless @turn == 1 %></p>
+
+<p><%= @message %></p>
+<% if @result: %>
+  <button id="restart">Restart!</button>
+<% end %>

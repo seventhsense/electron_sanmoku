@@ -1,6 +1,7 @@
 window.jQuery       = window.$                      = require 'jquery'
 window._            = require 'underscore'
 window.Backbone     = require 'backbone'
-# Backbone.Marionette = require 'backbone.marionette'
+Backbone.Marionette = require 'backbone.marionette'
+window.Radio        = require 'backbone.radio'
 window.Store        = require 'nedb'
 window.BackboNeDB   = require 'backbone-nedb'

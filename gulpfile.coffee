@@ -15,12 +15,14 @@ gulp.task 'main', ->
     .pipe(coffee()).on('error', gutil.log)
     .pipe(concat('main.js'))
     .pipe(gulp.dest('dist'))
+    .pipe notify    'main.js done', onLast: true
     .on 'finish', ->
        gutil.log 'main.js done'
 
 gulp.task 'app', ->
   gulp.src [
     './coffee/namespace.coffee',
+    './coffee/objects/**/*.coffee',
     './coffee/models/**/*.coffee',
     './coffee/collections/**/*.coffee',
     './coffee/views/**/*.coffee'
