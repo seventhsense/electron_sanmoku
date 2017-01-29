@@ -398,7 +398,7 @@ window.JST["start"] = function (__obj) {
         return MyApp.Channels.Game.trigger('render:game_info', obj);
       } else {
         model.set({
-          value: this.turn
+          value: this.player
         });
         result = this.spaces.checkGameEnd(model);
         if (result) {
@@ -603,9 +603,9 @@ window.JST["start"] = function (__obj) {
     Game.prototype.render_end = function(obj) {
       var message;
       if (obj.result === 1) {
-        message = "Winner is Player1";
+        message = "Winner is Player1!";
       } else if (obj.result === -1) {
-        message = "Winner is Player2";
+        message = "Winner is Player2!";
       } else {
         message = 'Draw...';
       }

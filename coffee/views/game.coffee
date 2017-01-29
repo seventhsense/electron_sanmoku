@@ -19,9 +19,9 @@ class MyApp.Views.Game extends Backbone.Marionette.View
 
   render_end: (obj)->
     if obj.result is 1
-      message = "Winner is Player1"
+      message = "Winner is Player1!"
     else if obj.result is -1
-      message = "Winner is Player2"
+      message = "Winner is Player2!"
     else
       message = 'Draw...'
     obj.message = message

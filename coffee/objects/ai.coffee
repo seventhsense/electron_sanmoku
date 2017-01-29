@@ -8,3 +8,5 @@ class MyApp.Objects.Ai
       @choose(spaces)
     else
       return choosen
+
+# 優先順位 勝ち > 負けを防ぐ > ２重取り > リーチ > 有効手

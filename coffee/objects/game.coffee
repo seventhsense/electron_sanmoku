@@ -19,24 +19,30 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
       @cpuTurn()
 
   cpuTurn: ->
+    # show message
     obj =
       turn: @turn
       message: 'cpu turn'
     MyApp.Channels.Game.trigger 'render:game_info', obj
+    # click event off
     @game_on = false
+    # choice
     sample = @ai.choose(@spaces)
     sample.set(value: @cpu)
-
+    # check game end
     result = @spaces.checkGameEnd(sample)
     return @gameEnd(result) if result
+    # turn change
     @turn = -1 * @turn
     return @playerTurn()
 
   playerTurn: ->
+    # show message
     obj =
       turn: @turn
       message: 'your turn'
     MyApp.Channels.Game.trigger 'render:game_info', obj
+    # accept click
     @game_on = true 
 
   onClickSpace: (model)->
@@ -47,12 +53,13 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
         message: 'already taken..'
       MyApp.Channels.Game.trigger 'render:game_info', obj
     else
-      model.set(value: @turn)
+      model.set(value: @player)
+      # end check
       result = @spaces.checkGameEnd(model)
       return @gameEnd(result) if result
-
+      # turn change
       @turn = -1 * @turn
-      @cpuTurn()
+      return @cpuTurn()
 
   gameEnd: (result)->
     @game_on = 0
