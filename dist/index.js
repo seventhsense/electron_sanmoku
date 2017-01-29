@@ -90,7 +90,7 @@ window.JST["game"] = function (__obj) {
     
       __out.push('</p>\n<p>Player2: ');
     
-      if (this.turn !== 1) {
+      if (this.turn === -1) {
         __out.push(__sanitize("○ "));
       }
     
@@ -253,7 +253,7 @@ window.JST["start"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<button>Start</button>\n');
+      __out.push('<button id="start">Start</button>\n<p>Player1: <input id="player1" type="radio" name="player" value=\'1\' checked></p>\n<p>Player2: <input id="player2" type="radio" name="player" value=\'-1\'></p>\n<p>Choose Player</p>\n');
     
     }).call(this);
     
@@ -313,7 +313,9 @@ window.JST["start"] = function (__obj) {
       this.listenTo(MyApp.Channels.Game, 'click:space', this.onClickSpace);
       this.spaces = options.collection;
       this.turn = 1;
-      return this.game_on = 1;
+      this.game_on = false;
+      this.player = options.player * 1;
+      return this.cpu = -1 * this.player;
     };
 
     Game.prototype.start = function() {
@@ -322,12 +324,51 @@ window.JST["start"] = function (__obj) {
         turn: this.turn,
         message: 'Start!'
       };
-      return MyApp.Channels.Game.trigger('render:game_info', obj);
+      MyApp.Channels.Game.trigger('render:game_info', obj);
+      if (this.player === 1) {
+        return this.playerTurn();
+      } else {
+        return this.cpuTurn();
+      }
+    };
+
+    Game.prototype.cpuTurn = function() {
+      var obj, result, sample;
+      obj = {
+        turn: this.turn,
+        message: 'cpu turn'
+      };
+      MyApp.Channels.Game.trigger('render:game_info', obj);
+      this.game_on = false;
+      sample = this.spaces.sample();
+      if (sample.get('value') === 0) {
+        sample.set({
+          value: this.cpu
+        });
+        result = this.spaces.checkGameEnd(sample);
+        if (result) {
+          return this.gameEnd(result);
+        }
+        this.turn = -1 * this.turn;
+        return this.playerTurn();
+      } else {
+        return this.cpuTurn();
+      }
+    };
+
+    Game.prototype.playerTurn = function() {
+      var obj;
+      obj = {
+        turn: this.turn,
+        message: 'your turn'
+      };
+      MyApp.Channels.Game.trigger('render:game_info', obj);
+      return this.game_on = true;
     };
 
     Game.prototype.onClickSpace = function(model) {
       var obj, result;
-      if (this.game_on === 0) {
+      if (this.game_on === false) {
         return;
       }
       if (model.get('value')) {
@@ -345,11 +386,7 @@ window.JST["start"] = function (__obj) {
           return this.gameEnd(result);
         }
         this.turn = -1 * this.turn;
-        obj = {
-          turn: this.turn,
-          message: 'change turn'
-        };
-        return MyApp.Channels.Game.trigger('render:game_info', obj);
+        return this.cpuTurn();
       }
     };
 
@@ -558,14 +595,13 @@ window.JST["start"] = function (__obj) {
     };
 
     Game.prototype.restart = function() {
-      var game;
-      console.log('restart');
-      console.log(this.collection);
+      var start_view;
       this.collection.resetValue();
-      game = new MyApp.Objects.Game({
+      start_view = new MyApp.Views.Start({
         collection: this.collection
       });
-      return game.start();
+      $('#main').append(start_view.render().el);
+      return this.remove();
     };
 
     return Game;
@@ -676,7 +712,7 @@ window.JST["start"] = function (__obj) {
     Start.prototype.template = JST['start'];
 
     Start.prototype.events = {
-      'click': 'start'
+      'click #start': 'start'
     };
 
     Start.prototype.id = 'game_info';
@@ -687,9 +723,11 @@ window.JST["start"] = function (__obj) {
     };
 
     Start.prototype.start = function(event) {
-      var game, game_info;
+      var game, game_info, player;
+      player = $('input[name=player]:checked').val();
       game = new MyApp.Objects.Game({
-        collection: this.collection
+        collection: this.collection,
+        player: player
       });
       game_info = new MyApp.Views.Game({
         collection: this.collection

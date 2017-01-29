@@ -28,9 +28,8 @@ class MyApp.Views.Game extends Backbone.Marionette.View
     @render(obj)
 
   restart: ()->
-    console.log 'restart'
-    console.log @collection
     @collection.resetValue()
-    game = new MyApp.Objects.Game
+    start_view = new MyApp.Views.Start
       collection: @collection
-    game.start()
+    $('#main').append start_view.render().el
+    @remove()

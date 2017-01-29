@@ -9,7 +9,7 @@ create_window = ->
     width: 300
     height: 400
   main_window.loadURL("file://#{__dirname}/index.html")
-  # main_window.webContents.openDevTools()
+  main_window.webContents.openDevTools()
   main_window.on 'closed', ->
     main_window = null
 

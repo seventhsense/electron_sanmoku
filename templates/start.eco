@@ -1,1 +1,4 @@
-<button>Start</button>
+<button id="start">Start</button>
+<p>Player1: <input id="player1" type="radio" name="player" value='1' checked></p>
+<p>Player2: <input id="player2" type="radio" name="player" value='-1'></p>
+<p>Choose Player</p>
