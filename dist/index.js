@@ -253,7 +253,7 @@ window.JST["start"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<button id="start">Start</button>\n<p>Player1: <input id="player1" type="radio" name="player" value=\'1\' checked></p>\n<p>Player2: <input id="player2" type="radio" name="player" value=\'-1\'></p>\n<p>Choose Player</p>\n');
+      __out.push('<button id="start">Start</button>\n<p>Player1: <select id="player1" name="player1">\n <option value="human">Human</option>\n <option value="cpu">CPU</option>\n</select>\n<p>Player2: <select id="player2" name="player2">\n <option value="human">Human</option>\n <option value="cpu">CPU</option>\n</select>\n<p>Choose Player</p>\n');
     
     }).call(this);
     
@@ -300,8 +300,8 @@ window.JST["start"] = function (__obj) {
 
 (function() {
   MyApp.Objects.Ai = (function() {
-    function Ai(cpu) {
-      this.cpu = cpu;
+    function Ai(cpu_turn) {
+      this.cpu_turn = cpu_turn;
     }
 
     Ai.prototype.choose = function(spaces) {
@@ -330,7 +330,7 @@ window.JST["start"] = function (__obj) {
       validChoice = this.validChoice(spaces);
       asum = spaces.getASum();
       bsum = spaces.getBSum();
-      reach = 2 * this.cpu;
+      reach = 2 * this.cpu_turn;
       if (asum === reach) {
         s = _.first(_.filter(spaces.getAAray(), function(s) {
           return s.get('value') === 0;
@@ -375,7 +375,7 @@ window.JST["start"] = function (__obj) {
       validChoice = this.validChoice(spaces);
       asum = spaces.getASum();
       bsum = spaces.getBSum();
-      reach = 2 * this.cpu * -1;
+      reach = 2 * this.cpu_turn * -1;
       if (asum === reach) {
         s = _.first(_.filter(spaces.getAAray(), function(s) {
           return s.get('value') === 0;
@@ -424,6 +424,43 @@ window.JST["start"] = function (__obj) {
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
+  MyApp.Objects.Cpu = (function(superClass) {
+    extend(Cpu, superClass);
+
+    function Cpu() {
+      return Cpu.__super__.constructor.apply(this, arguments);
+    }
+
+    Cpu.prototype.initialize = function(my_turn, spaces) {
+      this.my_turn = my_turn;
+      this.ai = new MyApp.Objects.Ai(this.my_turn);
+      return this.spaces = spaces;
+    };
+
+    Cpu.prototype.move = function() {
+      var obj, sample;
+      obj = {
+        turn: this.turn,
+        message: 'cpu turn'
+      };
+      MyApp.Channels.Game.trigger('render:game_info', obj);
+      sample = this.ai.choose(this.spaces);
+      sample.set({
+        value: this.my_turn
+      });
+      return MyApp.Channels.Game.trigger('turn_end', sample);
+    };
+
+    return Cpu;
+
+  })(Backbone.Marionette.Object);
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
   MyApp.Objects.Game = (function(superClass) {
     extend(Game, superClass);
 
@@ -432,87 +469,33 @@ window.JST["start"] = function (__obj) {
     }
 
     Game.prototype.initialize = function(options) {
-      this.listenTo(MyApp.Channels.Game, 'click:space', this.onClickSpace);
+      this.listenTo(MyApp.Channels.Game, 'get_spaces_info', this.getSpacesInfo);
+      this.listenTo(MyApp.Channels.Game, 'turn_end', this.checkGameEnd);
       this.spaces = options.collection;
-      this.turn = 1;
-      this.game_on = false;
-      this.player = options.player * 1;
-      this.cpu = -1 * this.player;
-      return this.ai = new MyApp.Objects.Ai(this.cpu);
+      return this.players = new MyApp.Objects.PlayerManager(options.player1, options.player2, this.spaces);
     };
 
     Game.prototype.start = function() {
-      var obj;
-      obj = {
-        turn: this.turn,
-        message: 'Start!'
-      };
-      MyApp.Channels.Game.trigger('render:game_info', obj);
-      if (this.player === 1) {
-        return this.playerTurn();
-      } else {
-        return this.cpuTurn();
-      }
-    };
-
-    Game.prototype.cpuTurn = function() {
-      var obj, result, sample;
-      obj = {
-        turn: this.turn,
-        message: 'cpu turn'
-      };
-      MyApp.Channels.Game.trigger('render:game_info', obj);
-      this.game_on = false;
-      sample = this.ai.choose(this.spaces);
-      console.log('sample', sample);
-      sample.set({
-        value: this.cpu
-      });
-      result = this.spaces.checkGameEnd(sample);
-      if (result) {
-        return this.gameEnd(result);
-      }
-      this.turn = -1 * this.turn;
-      return this.playerTurn();
-    };
-
-    Game.prototype.playerTurn = function() {
-      var obj;
-      obj = {
-        turn: this.turn,
-        message: 'your turn'
-      };
-      MyApp.Channels.Game.trigger('render:game_info', obj);
-      return this.game_on = true;
-    };
-
-    Game.prototype.onClickSpace = function(model) {
-      var obj, result;
-      if (this.game_on === false) {
-        return;
-      }
-      if (model.get('value')) {
-        obj = {
-          turn: this.turn,
-          message: 'already taken..'
+      this.gameEnd = false;
+      return this.intervalId = setInterval((function(_this) {
+        return function() {
+          return _this.players.loop();
         };
-        return MyApp.Channels.Game.trigger('render:game_info', obj);
-      } else {
-        model.set({
-          value: this.player
-        });
-        result = this.spaces.checkGameEnd(model);
-        if (result) {
-          return this.gameEnd(result);
-        }
-        this.turn = -1 * this.turn;
-        return this.cpuTurn();
+      })(this), 500);
+    };
+
+    Game.prototype.checkGameEnd = function(model) {
+      var result;
+      result = this.spaces.checkGameEnd(model);
+      if (result) {
+        return this.doGameEnd(result);
       }
     };
 
-    Game.prototype.gameEnd = function(result) {
+    Game.prototype.doGameEnd = function(result) {
       var obj;
-      this.game_on = 0;
+      clearInterval(this.intervalId);
+      this.players.finish();
       obj = {
         result: result
       };
@@ -521,6 +504,116 @@ window.JST["start"] = function (__obj) {
     };
 
     return Game;
+
+  })(Backbone.Marionette.Object);
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  MyApp.Objects.Human = (function(superClass) {
+    extend(Human, superClass);
+
+    function Human() {
+      return Human.__super__.constructor.apply(this, arguments);
+    }
+
+    Human.prototype.initialize = function(my_turn) {
+      this.listenTo(MyApp.Channels.Game, 'click:space', this.onClickSpace);
+      this.my_turn = my_turn;
+      return this.player_turn = false;
+    };
+
+    Human.prototype.move = function() {
+      var obj;
+      console.log("player " + this.my_turn + " turn");
+      this.player_turn = true;
+      obj = {
+        turn: this.my_turn,
+        message: 'your turn'
+      };
+      return MyApp.Channels.Game.trigger('render:game_info', obj);
+    };
+
+    Human.prototype.onClickSpace = function(model) {
+      var obj;
+      console.log('on click');
+      if (this.player_turn === false) {
+        return;
+      }
+      if (model.get('value')) {
+        obj = {
+          message: 'already taken..'
+        };
+        return MyApp.Channels.Game.trigger('render:game_info', obj);
+      } else {
+        this.player_turn = false;
+        model.set({
+          value: this.my_turn
+        });
+        return MyApp.Channels.Game.trigger('turn_end', model);
+      }
+    };
+
+    return Human;
+
+  })(Backbone.Marionette.Object);
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  MyApp.Objects.PlayerManager = (function(superClass) {
+    extend(PlayerManager, superClass);
+
+    function PlayerManager() {
+      return PlayerManager.__super__.constructor.apply(this, arguments);
+    }
+
+    PlayerManager.prototype.initialize = function(player1, player2, spaces) {
+      this.listenTo(MyApp.Channels.Game, 'turn_end', this.turnChange);
+      this.turn = 1;
+      this.player1 = (function() {
+        switch (player1) {
+          case 'human':
+            return new MyApp.Objects.Human(this.turn);
+          case 'cpu':
+            return new MyApp.Objects.Cpu(this.turn, spaces);
+        }
+      }).call(this);
+      return this.player2 = (function() {
+        switch (player2) {
+          case 'human':
+            return new MyApp.Objects.Human(this.turn * -1);
+          case 'cpu':
+            return new MyApp.Objects.Cpu(this.turn * -1, spaces);
+        }
+      }).call(this);
+    };
+
+    PlayerManager.prototype.loop = function() {
+      if (this.turn === 1) {
+        return this.player1.move();
+      } else {
+        return this.player2.move();
+      }
+    };
+
+    PlayerManager.prototype.turnChange = function() {
+      return this.turn = this.turn * -1;
+    };
+
+    PlayerManager.prototype.finish = function() {
+      this.player1.destroy();
+      this.player2.destroy();
+      return this.destroy();
+    };
+
+    return PlayerManager;
 
   })(Backbone.Marionette.Object);
 
@@ -890,11 +983,13 @@ window.JST["start"] = function (__obj) {
     };
 
     Start.prototype.start = function(event) {
-      var game, game_info, player;
-      player = $('input[name=player]:checked').val();
+      var game, game_info, player1, player2;
+      player1 = $('#player1').val();
+      player2 = $('#player2').val();
       game = new MyApp.Objects.Game({
         collection: this.collection,
-        player: player
+        player1: player1,
+        player2: player2
       });
       game_info = new MyApp.Views.Game({
         collection: this.collection

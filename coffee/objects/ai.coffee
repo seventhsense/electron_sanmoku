@@ -1,6 +1,6 @@
 class MyApp.Objects.Ai
-  constructor: (cpu)->
-    @cpu = cpu
+  constructor: (cpu_turn)->
+    @cpu_turn = cpu_turn
 
   choose: (spaces)->
     choosen = @checkReach(spaces)
@@ -20,7 +20,7 @@ class MyApp.Objects.Ai
     validChoice = @validChoice(spaces)
     asum = spaces.getASum()
     bsum = spaces.getBSum()
-    reach = 2 * @cpu
+    reach = 2 * @cpu_turn
     # ななめリーチ
     if asum is reach
       s = _.first _.filter spaces.getAAray(), (s)-> return s.get('value') is 0
@@ -47,7 +47,7 @@ class MyApp.Objects.Ai
     validChoice = @validChoice(spaces)
     asum = spaces.getASum()
     bsum = spaces.getBSum()
-    reach = 2 * @cpu * -1
+    reach = 2 * @cpu_turn * -1
     # ななめリーチ
     if asum is reach
       s = _.first _.filter spaces.getAAray(), (s)-> return s.get('value') is 0
