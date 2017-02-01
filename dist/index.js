@@ -522,7 +522,6 @@ window.JST["start"] = function (__obj) {
 
     Human.prototype.initialize = function(my_turn) {
       this.listenTo(MyApp.Channels.Game, 'click:space', this.onClickSpace);
-      this.my_turn = my_turn;
       return this.allow_click = false;
     };
 
