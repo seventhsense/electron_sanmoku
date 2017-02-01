@@ -1,6 +1,7 @@
 class MyApp.Objects.Human extends Backbone.Marionette.Object
   initialize: (my_turn)->
     @listenTo MyApp.Channels.Game, 'click:space', @onClickSpace
+    @my_turn = my_turn
     @allow_click = false
 
   move: ->
