@@ -1,4 +1,10 @@
 <button id="start">Start</button>
-<p>Player1: <input id="player1" type="radio" name="player" value='1' checked></p>
-<p>Player2: <input id="player2" type="radio" name="player" value='-1'></p>
+<p>Player1: <select id="player1" name="player1">
+ <option value="human">Human</option>
+ <option value="cpu">CPU</option>
+</select>
+<p>Player2: <select id="player2" name="player2">
+ <option value="human">Human</option>
+ <option value="cpu">CPU</option>
+</select>
 <p>Choose Player</p>
