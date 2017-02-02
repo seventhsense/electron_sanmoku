@@ -253,7 +253,7 @@ window.JST["start"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<button id="start">Start</button>\n<p>Player1: <select id="player1" name="player1">\n <option value="human">Human</option>\n <option value="cpu">CPU</option>\n</select>\n<p>Player2: <select id="player2" name="player2">\n <option value="human">Human</option>\n <option value="cpu">CPU</option>\n</select>\n<p>Choose Player</p>\n');
+      __out.push('<button id="start">Start</button>\n<p>Player1: <select id="player1" name="player1">\n <option value="cpu">CPU</option>\n <option value="human">Human</option>\n</select>\n<p>Player2: <select id="player2" name="player2">\n <option value="cpu">CPU</option>\n <option value="human">Human</option>\n</select>\n<p>Choose Player</p>\n');
     
     }).call(this);
     
@@ -421,6 +421,76 @@ window.JST["start"] = function (__obj) {
 }).call(this);
 
 (function() {
+  MyApp.Objects.Ai2 = (function() {
+    function Ai2(cpu_turn) {
+      this.cpu_turn = cpu_turn;
+    }
+
+    Ai2.prototype.choose = function(spaces) {
+      var candidate, candidates, choosen, clone_spaces, valid_choice;
+      clone_spaces = spaces.shallow_clone();
+      valid_choice = this.validChoice(clone_spaces);
+      candidates = [];
+      _.each(valid_choice, (function(_this) {
+        return function(model) {
+          var i, j, result, test_spaces, win;
+          win = 0;
+          for (i = j = 1; j <= 1000; i = ++j) {
+            test_spaces = spaces.shallow_clone();
+            result = _this.doRandomGame(model, test_spaces);
+            if (result === _this.cpu_turn) {
+              win += 1;
+            }
+          }
+          return candidates.push({
+            model: model,
+            win: win
+          });
+        };
+      })(this));
+      console.log(candidates);
+      candidate = _.max(candidates, function(candidate) {
+        return candidate.win;
+      });
+      choosen = _.first(spaces.where({
+        x: candidate.model.get('x'),
+        y: candidate.model.get('y')
+      }));
+      console.log(choosen);
+      return choosen;
+    };
+
+    Ai2.prototype.validChoice = function(spaces) {
+      return spaces.where({
+        value: 0
+      });
+    };
+
+    Ai2.prototype.doRandomGame = function(model, test_spaces) {
+      var clone_turn, result;
+      model.set({
+        value: this.cpu_turn
+      });
+      result = test_spaces.checkGameEnd(model);
+      clone_turn = this.cpu_turn * -1;
+      while (result === false) {
+        model = _.sample(this.validChoice(test_spaces));
+        model.set({
+          value: clone_turn
+        });
+        result = test_spaces.checkGameEnd(model);
+        clone_turn = clone_turn * -1;
+      }
+      return result;
+    };
+
+    return Ai2;
+
+  })();
+
+}).call(this);
+
+(function() {
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -433,7 +503,7 @@ window.JST["start"] = function (__obj) {
 
     Cpu.prototype.initialize = function(my_turn, spaces) {
       this.my_turn = my_turn;
-      this.ai = new MyApp.Objects.Ai(this.my_turn);
+      this.ai = new MyApp.Objects.Ai2(this.my_turn);
       return this.spaces = spaces;
     };
 
@@ -481,7 +551,7 @@ window.JST["start"] = function (__obj) {
         return function() {
           return _this.players.loop();
         };
-      })(this), 500);
+      })(this), 200);
     };
 
     Game.prototype.checkGameEnd = function(model) {
@@ -753,6 +823,15 @@ window.JST["start"] = function (__obj) {
         x: 0,
         y: 2
       }));
+    };
+
+    Spaces.prototype.shallow_clone = function() {
+      var clone;
+      clone = new MyApp.Collections.Spaces();
+      this.each(function(model) {
+        return clone.add(new MyApp.Models.Space(model.toJSON()));
+      });
+      return clone;
     };
 
     return Spaces;

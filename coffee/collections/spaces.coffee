@@ -45,3 +45,9 @@ class MyApp.Collections.Spaces extends Backbone.Collection
 
   getBAray: ->
     _.union @where(x:2, y:0), @where(x:1, y:1), @where(x:0, y:2)
+
+  shallow_clone: ->
+    clone = new MyApp.Collections.Spaces()
+    @each (model)->
+      clone.add new MyApp.Models.Space model.toJSON()
+    clone
