@@ -9,7 +9,7 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
     @gameEnd = false
     @intervalId = setInterval =>
       @players.loop()
-    , 500
+    , 200
 
   checkGameEnd: (model)->
     result = @spaces.checkGameEnd(model)
