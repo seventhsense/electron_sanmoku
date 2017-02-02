@@ -11,7 +11,6 @@ class MyApp.Objects.PlayerManager extends Backbone.Marionette.Object
     
   loop: ->
     if @turn is 1 then @player1.move() else @player2.move()
-    # return
 
   turnChange: ->
     @turn = @turn * -1
