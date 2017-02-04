@@ -1,7 +1,9 @@
 class MyApp.Objects.Cpu extends Backbone.Marionette.Object
-  initialize: (my_turn, spaces)->
+  initialize: (my_turn, spaces, type)->
     @my_turn = my_turn
-    @ai = new MyApp.Objects.Ai2 @my_turn
+    @ai = switch type
+      when 'normal' then new MyApp.Objects.Ai @my_turn
+      when 'monte calro' then new MyApp.Objects.Ai2 @my_turn
     @spaces = spaces
 
   move: ->

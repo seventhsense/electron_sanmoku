@@ -1,10 +1,13 @@
 <button id="start">Start</button>
+<button id="start1000">Start 1000</button>
 <p>Player1: <select id="player1" name="player1">
- <option value="cpu">CPU</option>
+ <option value="cpu1">CPU1</option>
+ <option value="cpu2">CPU2</option>
  <option value="human">Human</option>
 </select>
 <p>Player2: <select id="player2" name="player2">
- <option value="cpu">CPU</option>
+ <option value="cpu1">CPU1</option>
+ <option value="cpu2">CPU2</option>
  <option value="human">Human</option>
 </select>
 <p>Choose Player</p>
