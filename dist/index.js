@@ -568,16 +568,25 @@ window.JST["start"] = function (__obj) {
       this.listenTo(MyApp.Channels.Game, 'get_spaces_info', this.getSpacesInfo);
       this.listenTo(MyApp.Channels.Game, 'turn_end', this.checkGameEnd);
       this.spaces = options.collection;
-      return this.players = new MyApp.Objects.PlayerManager(options.player1, options.player2, this.spaces);
+      this.remain = options.remain;
+      this.player1 = options.player1;
+      this.player2 = options.player2;
+      return this.players = new MyApp.Objects.PlayerManager(this.player1, this.player2, this.spaces);
     };
 
     Game.prototype.start = function() {
+      var interval;
       this.gameEnd = false;
+      if (this.player1 === 'human' || this.player2 === 'human') {
+        interval = 200;
+      } else {
+        interval = 2;
+      }
       return this.intervalId = setInterval((function(_this) {
         return function() {
           return _this.players.loop();
         };
-      })(this), 200);
+      })(this), interval);
     };
 
     Game.prototype.checkGameEnd = function(model) {
@@ -592,11 +601,21 @@ window.JST["start"] = function (__obj) {
       var obj;
       clearInterval(this.intervalId);
       this.players.finish();
-      obj = {
-        result: result
-      };
-      MyApp.Channels.Game.trigger('render:game_end', obj);
       MyApp.Channels.Game.trigger('count_up', result);
+      if (this.remain > 0) {
+        obj = {
+          result: result,
+          remain: this.remain,
+          player1: this.player1,
+          player2: this.player2
+        };
+        MyApp.Channels.Game.trigger('restart_auto', obj);
+      } else {
+        obj = {
+          result: result
+        };
+        MyApp.Channels.Game.trigger('render:game_end', obj);
+      }
       return this.destroy();
     };
 
@@ -1011,7 +1030,8 @@ window.JST["start"] = function (__obj) {
 
     Game.prototype.initialize = function() {
       this.listenTo(MyApp.Channels.Game, 'render:game_info', this.render);
-      return this.listenTo(MyApp.Channels.Game, 'render:game_end', this.render_end);
+      this.listenTo(MyApp.Channels.Game, 'render:game_end', this.render_end);
+      return this.listenTo(MyApp.Channels.Game, 'restart_auto', this.restartAuto);
     };
 
     Game.prototype.events = {
@@ -1059,6 +1079,24 @@ window.JST["start"] = function (__obj) {
         collection: this.collection
       });
       $('#main').append(start_view.render().el);
+      return this.remove();
+    };
+
+    Game.prototype.restartAuto = function(obj) {
+      var game, game_info;
+      this.collection.resetValue();
+      console.log(obj.remain);
+      game_info = new MyApp.Views.Game({
+        collection: this.collection
+      });
+      $('#main').append(game_info.render().el);
+      game = new MyApp.Objects.Game({
+        collection: this.collection,
+        player1: obj.player1,
+        player2: obj.player2,
+        remain: obj.remain - 1
+      });
+      game.start();
       return this.remove();
     };
 
@@ -1199,7 +1237,7 @@ window.JST["start"] = function (__obj) {
     };
 
     Start.prototype.start1000 = function(event) {
-      var game_info, player1, player2;
+      var game, game_info, player1, player2;
       player1 = $('#player1').val();
       player2 = $('#player2').val();
       if (player1 === 'human' || player2 === 'human') {
@@ -1208,7 +1246,15 @@ window.JST["start"] = function (__obj) {
       game_info = new MyApp.Views.Game({
         collection: this.collection
       });
-      return $('#main').append(game_info.render().el);
+      $('#main').append(game_info.render().el);
+      game = new MyApp.Objects.Game({
+        collection: this.collection,
+        player1: player1,
+        player2: player2,
+        remain: 1000
+      });
+      game.start();
+      return this.remove();
     };
 
     return Start;
