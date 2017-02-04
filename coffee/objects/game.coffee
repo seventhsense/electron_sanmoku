@@ -21,4 +21,5 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
     obj =
       result: result
     MyApp.Channels.Game.trigger 'render:game_end', obj
+    MyApp.Channels.Game.trigger 'count_up', result
     @destroy()

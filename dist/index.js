@@ -39,6 +39,69 @@ function r(e){return o.result(e,"store")||o.result(e.collection,"store")}var i=n
 if (!window.JST) {
   window.JST = {};
 }
+window.JST["counter"] = function (__obj) {
+  if (!__obj) __obj = {};
+  var __out = [], __capture = function(callback) {
+    var out = __out, result;
+    __out = [];
+    callback.call(this);
+    result = __out.join('');
+    __out = out;
+    return __safe(result);
+  }, __sanitize = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else if (typeof value !== 'undefined' && value != null) {
+      return __escape(value);
+    } else {
+      return '';
+    }
+  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+  __safe = __obj.safe = function(value) {
+    if (value && value.ecoSafe) {
+      return value;
+    } else {
+      if (!(typeof value !== 'undefined' && value != null)) value = '';
+      var result = new String(value);
+      result.ecoSafe = true;
+      return result;
+    }
+  };
+  if (!__escape) {
+    __escape = __obj.escape = function(value) {
+      return ('' + value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    };
+  }
+  (function() {
+    (function() {
+      __out.push('<button id="reset">Reset Counter</button>\n<p>Player1 Won: ');
+    
+      __out.push(__sanitize(this.player1));
+    
+      __out.push('</p>\n<p>Player2 Won: ');
+    
+      __out.push(__sanitize(this.player2));
+    
+      __out.push('</p>\n<p>Draw: ');
+    
+      __out.push(__sanitize(this.draw));
+    
+      __out.push('</p>\n');
+    
+    }).call(this);
+    
+  }).call(__obj);
+  __obj.safe = __objSafe, __obj.escape = __escape;
+  return __out.join('');
+};
+
+if (!window.JST) {
+  window.JST = {};
+}
 window.JST["game"] = function (__obj) {
   if (!__obj) __obj = {};
   var __out = [], __capture = function(callback) {
@@ -99,57 +162,6 @@ window.JST["game"] = function (__obj) {
       __out.push(__sanitize(this.message));
     
       __out.push('</p>\n');
-    
-    }).call(this);
-    
-  }).call(__obj);
-  __obj.safe = __objSafe, __obj.escape = __escape;
-  return __out.join('');
-};
-
-if (!window.JST) {
-  window.JST = {};
-}
-window.JST["layout"] = function (__obj) {
-  if (!__obj) __obj = {};
-  var __out = [], __capture = function(callback) {
-    var out = __out, result;
-    __out = [];
-    callback.call(this);
-    result = __out.join('');
-    __out = out;
-    return __safe(result);
-  }, __sanitize = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else if (typeof value !== 'undefined' && value != null) {
-      return __escape(value);
-    } else {
-      return '';
-    }
-  }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-  __safe = __obj.safe = function(value) {
-    if (value && value.ecoSafe) {
-      return value;
-    } else {
-      if (!(typeof value !== 'undefined' && value != null)) value = '';
-      var result = new String(value);
-      result.ecoSafe = true;
-      return result;
-    }
-  };
-  if (!__escape) {
-    __escape = __obj.escape = function(value) {
-      return ('' + value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    };
-  }
-  (function() {
-    (function() {
-      __out.push('iii\n');
     
     }).call(this);
     
@@ -253,7 +265,7 @@ window.JST["start"] = function (__obj) {
   }
   (function() {
     (function() {
-      __out.push('<button id="start">Start</button>\n<p>Player1: <select id="player1" name="player1">\n <option value="cpu">CPU</option>\n <option value="human">Human</option>\n</select>\n<p>Player2: <select id="player2" name="player2">\n <option value="cpu">CPU</option>\n <option value="human">Human</option>\n</select>\n<p>Choose Player</p>\n');
+      __out.push('<button id="start">Start</button>\n<button id="start1000">Start 1000</button>\n<p>Player1: <select id="player1" name="player1">\n <option value="cpu1">CPU1</option>\n <option value="cpu2">CPU2</option>\n <option value="human">Human</option>\n</select>\n<p>Player2: <select id="player2" name="player2">\n <option value="cpu1">CPU1</option>\n <option value="cpu2">CPU2</option>\n <option value="human">Human</option>\n</select>\n<p>Choose Player</p>\n');
     
     }).call(this);
     
@@ -270,7 +282,7 @@ window.JST["start"] = function (__obj) {
     Channels: {},
     Objects: {},
     initialize: function() {
-      var board, i, j, k, l, spaces, start_view;
+      var board, counter_view, draw, i, j, k, l, player1_win, player2_win, spaces, start_view;
       spaces = new MyApp.Collections.Spaces;
       for (i = k = 0; k <= 2; i = ++k) {
         for (j = l = 0; l <= 2; j = ++l) {
@@ -285,6 +297,15 @@ window.JST["start"] = function (__obj) {
       });
       $('#main').html(board.render().el);
       MyApp.Channels.Game = Radio.channel('game');
+      player1_win = new MyApp.Models.Counter;
+      player2_win = new MyApp.Models.Counter;
+      draw = new MyApp.Models.Counter;
+      counter_view = new MyApp.Views.Counter({
+        player1_win: player1_win,
+        player2_win: player2_win,
+        draw: draw
+      });
+      $('#main').append(counter_view.render().el);
       start_view = new MyApp.Views.Start({
         collection: spaces
       });
@@ -435,7 +456,7 @@ window.JST["start"] = function (__obj) {
         return function(model) {
           var i, j, result, test_spaces, win;
           win = 0;
-          for (i = j = 1; j <= 1000; i = ++j) {
+          for (i = j = 1; j <= 300; i = ++j) {
             test_spaces = spaces.shallow_clone();
             result = _this.doRandomGame(model, test_spaces);
             if (result === _this.cpu_turn) {
@@ -448,7 +469,6 @@ window.JST["start"] = function (__obj) {
           });
         };
       })(this));
-      console.log(candidates);
       candidate = _.max(candidates, function(candidate) {
         return candidate.win;
       });
@@ -456,7 +476,6 @@ window.JST["start"] = function (__obj) {
         x: candidate.model.get('x'),
         y: candidate.model.get('y')
       }));
-      console.log(choosen);
       return choosen;
     };
 
@@ -501,9 +520,16 @@ window.JST["start"] = function (__obj) {
       return Cpu.__super__.constructor.apply(this, arguments);
     }
 
-    Cpu.prototype.initialize = function(my_turn, spaces) {
+    Cpu.prototype.initialize = function(my_turn, spaces, type) {
       this.my_turn = my_turn;
-      this.ai = new MyApp.Objects.Ai2(this.my_turn);
+      this.ai = (function() {
+        switch (type) {
+          case 'normal':
+            return new MyApp.Objects.Ai(this.my_turn);
+          case 'monte calro':
+            return new MyApp.Objects.Ai2(this.my_turn);
+        }
+      }).call(this);
       return this.spaces = spaces;
     };
 
@@ -570,6 +596,7 @@ window.JST["start"] = function (__obj) {
         result: result
       };
       MyApp.Channels.Game.trigger('render:game_end', obj);
+      MyApp.Channels.Game.trigger('count_up', result);
       return this.destroy();
     };
 
@@ -649,16 +676,20 @@ window.JST["start"] = function (__obj) {
         switch (player1) {
           case 'human':
             return new MyApp.Objects.Human(this.turn);
-          case 'cpu':
-            return new MyApp.Objects.Cpu(this.turn, spaces);
+          case 'cpu1':
+            return new MyApp.Objects.Cpu(this.turn, spaces, 'normal');
+          case 'cpu2':
+            return new MyApp.Objects.Cpu(this.turn, spaces, 'monte calro');
         }
       }).call(this);
       return this.player2 = (function() {
         switch (player2) {
           case 'human':
             return new MyApp.Objects.Human(this.turn * -1);
-          case 'cpu':
-            return new MyApp.Objects.Cpu(this.turn * -1, spaces);
+          case 'cpu1':
+            return new MyApp.Objects.Cpu(this.turn * -1, spaces, 'normal');
+          case 'cpu2':
+            return new MyApp.Objects.Cpu(this.turn * -1, spaces, 'monte calro');
         }
       }).call(this);
     };
@@ -684,6 +715,27 @@ window.JST["start"] = function (__obj) {
     return PlayerManager;
 
   })(Backbone.Marionette.Object);
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  MyApp.Models.Counter = (function(superClass) {
+    extend(Counter, superClass);
+
+    function Counter() {
+      return Counter.__super__.constructor.apply(this, arguments);
+    }
+
+    Counter.prototype.defaults = {
+      count: 0
+    };
+
+    return Counter;
+
+  })(Backbone.Model);
 
 }).call(this);
 
@@ -879,6 +931,75 @@ window.JST["start"] = function (__obj) {
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
+  MyApp.Views.Counter = (function(superClass) {
+    extend(Counter, superClass);
+
+    function Counter() {
+      return Counter.__super__.constructor.apply(this, arguments);
+    }
+
+    Counter.prototype.template = JST['counter'];
+
+    Counter.prototype.initialize = function(options) {
+      this.listenTo(MyApp.Channels.Game, 'count_up', this.countUp);
+      this.player1 = options.player1_win;
+      this.player2 = options.player2_win;
+      return this.draw = options.draw;
+    };
+
+    Counter.prototype.events = {
+      'click #reset': 'resetCounter'
+    };
+
+    Counter.prototype.render = function() {
+      this.$el.html(this.template({
+        player1: this.player1.get('count'),
+        player2: this.player2.get('count'),
+        draw: this.draw.get('count')
+      }));
+      return this;
+    };
+
+    Counter.prototype.countUp = function(result) {
+      if (result === 1) {
+        this.player1.set({
+          count: this.player1.get('count') + 1
+        });
+      } else if (result === -1) {
+        this.player2.set({
+          count: this.player2.get('count') + 1
+        });
+      } else {
+        this.draw.set({
+          count: this.draw.get('count') + 1
+        });
+      }
+      return this.render();
+    };
+
+    Counter.prototype.resetCounter = function() {
+      this.player1.set({
+        count: 0
+      });
+      this.player2.set({
+        count: 0
+      });
+      this.draw.set({
+        count: 0
+      });
+      return this.render();
+    };
+
+    return Counter;
+
+  })(Backbone.View);
+
+}).call(this);
+
+(function() {
+  var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
   MyApp.Views.Game = (function(superClass) {
     extend(Game, superClass);
 
@@ -1049,7 +1170,8 @@ window.JST["start"] = function (__obj) {
     Start.prototype.template = JST['start'];
 
     Start.prototype.events = {
-      'click #start': 'start'
+      'click #start': 'start',
+      'click #start1000': 'start1000'
     };
 
     Start.prototype.id = 'game_info';
@@ -1074,6 +1196,19 @@ window.JST["start"] = function (__obj) {
       $('#main').append(game_info.render().el);
       game.start();
       return this.remove();
+    };
+
+    Start.prototype.start1000 = function(event) {
+      var game_info, player1, player2;
+      player1 = $('#player1').val();
+      player2 = $('#player2').val();
+      if (player1 === 'human' || player2 === 'human') {
+        return;
+      }
+      game_info = new MyApp.Views.Game({
+        collection: this.collection
+      });
+      return $('#main').append(game_info.render().el);
     };
 
     return Start;

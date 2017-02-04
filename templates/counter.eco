@@ -1,0 +1,4 @@
+<button id="reset">Reset Counter</button>
+<p>Player1 Won: <%= @player1 %></p>
+<p>Player2 Won: <%= @player2 %></p>
+<p>Draw: <%= @draw %></p>
