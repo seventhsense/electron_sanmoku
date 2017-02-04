@@ -8,17 +8,15 @@ class MyApp.Objects.Ai2
     candidates = []
     _.each valid_choice, (model)=>
       win = 0
-      for i in [1..1000]
+      for i in [1..300]
         test_spaces = spaces.shallow_clone()
         result = @doRandomGame(model, test_spaces)
         win += 1 if result is @cpu_turn
       candidates.push {model: model, win: win}
-    console.log candidates
     candidate = _.max candidates, (candidate)-> return candidate.win
     choosen = _.first spaces.where
       x: candidate.model.get('x')
       y: candidate.model.get('y')
-    console.log choosen
     return choosen
 
   validChoice: (spaces)->
