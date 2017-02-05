@@ -5,10 +5,10 @@ class MyApp.Objects.Ai
   choose: (spaces)->
     choosen = @checkReach(spaces)
     unless choosen
-      console.log 'check player reach'
+      # console.log 'check player reach'
       choosen = @checkPlayerReach(spaces)
     unless choosen
-      console.log 'random'
+      # console.log 'random'
       choosen =  _.sample @validChoice(spaces)
     return choosen
 

@@ -15,7 +15,6 @@
       height: 500
     });
     main_window.loadURL("file://" + __dirname + "/index.html");
-    main_window.webContents.openDevTools();
     return main_window.on('closed', function() {
       return main_window = null;
     });

@@ -49,5 +49,8 @@ class MyApp.Collections.Spaces extends Backbone.Collection
   shallow_clone: ->
     clone = new MyApp.Collections.Spaces()
     @each (model)->
-      clone.add new MyApp.Models.Space model.toJSON()
+      clone.add new MyApp.Models.Space
+        x: model.get('x')
+        y: model.get('y')
+        value: model.get('value')
     clone

@@ -329,11 +329,9 @@ window.JST["start"] = function (__obj) {
       var choosen;
       choosen = this.checkReach(spaces);
       if (!choosen) {
-        console.log('check player reach');
         choosen = this.checkPlayerReach(spaces);
       }
       if (!choosen) {
-        console.log('random');
         choosen = _.sample(this.validChoice(spaces));
       }
       return choosen;
@@ -454,13 +452,20 @@ window.JST["start"] = function (__obj) {
       candidates = [];
       _.each(valid_choice, (function(_this) {
         return function(model) {
-          var i, j, result, test_spaces, win;
+          var i, j, result, test_model, test_spaces, win;
           win = 0;
-          for (i = j = 1; j <= 300; i = ++j) {
-            test_spaces = spaces.shallow_clone();
-            result = _this.doRandomGame(model, test_spaces);
+          for (i = j = 1; j <= 100; i = ++j) {
+            test_spaces = clone_spaces.shallow_clone();
+            test_model = _.first(test_spaces.where({
+              x: model.get('x'),
+              y: model.get('y')
+            }));
+            result = _this.doRandomGame(test_model, test_spaces);
             if (result === _this.cpu_turn) {
               win += 1;
+            }
+            if (result === 'draw') {
+              win += 0.5;
             }
           }
           return candidates.push({
@@ -491,6 +496,9 @@ window.JST["start"] = function (__obj) {
         value: this.cpu_turn
       });
       result = test_spaces.checkGameEnd(model);
+      if (result) {
+        return result;
+      }
       clone_turn = this.cpu_turn * -1;
       while (result === false) {
         model = _.sample(this.validChoice(test_spaces));
@@ -536,7 +544,7 @@ window.JST["start"] = function (__obj) {
     Cpu.prototype.move = function() {
       var model, obj;
       obj = {
-        turn: this.turn,
+        turn: this.my_turn,
         message: 'cpu turn'
       };
       MyApp.Channels.Game.trigger('render:game_info', obj);
@@ -580,7 +588,7 @@ window.JST["start"] = function (__obj) {
       if (this.player1 === 'human' || this.player2 === 'human') {
         interval = 200;
       } else {
-        interval = 2;
+        interval = 1;
       }
       return this.intervalId = setInterval((function(_this) {
         return function() {
@@ -900,7 +908,11 @@ window.JST["start"] = function (__obj) {
       var clone;
       clone = new MyApp.Collections.Spaces();
       this.each(function(model) {
-        return clone.add(new MyApp.Models.Space(model.toJSON()));
+        return clone.add(new MyApp.Models.Space({
+          x: model.get('x'),
+          y: model.get('y'),
+          value: model.get('value')
+        }));
       });
       return clone;
     };
@@ -1042,6 +1054,7 @@ window.JST["start"] = function (__obj) {
 
     Game.prototype.render = function(obj) {
       var message, result, turn;
+      console.log('obj', obj);
       if (obj) {
         turn = obj.turn;
       }
@@ -1251,7 +1264,7 @@ window.JST["start"] = function (__obj) {
         collection: this.collection,
         player1: player1,
         player2: player2,
-        remain: 1000
+        remain: 10 - 1
       });
       game.start();
       return this.remove();

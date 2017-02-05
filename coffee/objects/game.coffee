@@ -10,7 +10,7 @@ class MyApp.Objects.Game extends Backbone.Marionette.Object
 
   start: ->
     @gameEnd = false
-    if @player1 is 'human' or @player2 is 'human' then interval = 200 else interval = 2
+    if @player1 is 'human' or @player2 is 'human' then interval = 200 else interval = 1
     @intervalId = setInterval =>
       @players.loop()
     , interval

@@ -9,7 +9,7 @@ class MyApp.Objects.Cpu extends Backbone.Marionette.Object
   move: ->
     # show message
     obj =
-      turn: @turn
+      turn: @my_turn
       message: 'cpu turn'
     MyApp.Channels.Game.trigger 'render:game_info', obj
     # choice

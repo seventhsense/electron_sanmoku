@@ -9,6 +9,7 @@ class MyApp.Views.Game extends Backbone.Marionette.View
   id: 'game_info'
 
   render: (obj)->
+    console.log 'obj', obj
     turn = obj.turn if obj
     message = obj.message if obj
     result = obj.result if obj

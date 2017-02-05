@@ -34,6 +34,6 @@ class MyApp.Views.Start extends Backbone.View
       collection: @collection
       player1: player1
       player2: player2
-      remain: 1000
+      remain: 10 - 1
     game.start()
     @remove()
